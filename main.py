@@ -37,7 +37,8 @@ def prune_model_custom(model, mask_dict):
         if isinstance(m, nn.Conv2d):
             prune.CustomFromMask.apply(m, 'weight', mask=mask_dict[name+'.weight_mask'])
 import os
-from torchvision.transforms import transforms, datasets
+from torchvision.transforms import transforms
+from torchvision import datasets
 
 class ImageFolderTwoTransform(datasets.ImageFolder):
     def __getitem__(self, index):
