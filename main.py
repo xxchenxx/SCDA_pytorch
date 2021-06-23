@@ -38,7 +38,7 @@ def prune_model_custom(model, mask_dict):
     for name,m in model.named_modules():
         if isinstance(m, nn.Conv2d):
             prune.CustomFromMask.apply(m, 'weight', mask=mask_dict[name+'.weight_mask'])
-
+import sys
 prune_model_custom(net1, torch.load(f"/ssd2/tlc/LT_rewind15/{sys.argv[2]}-model_best.pth.tar")['state_dict'])
 import os
 from torchvision.transforms import transforms
@@ -54,7 +54,7 @@ class ImageFolderTwoTransform(datasets.ImageFolder):
             target = self.target_transform(target)
 
         return sample1, target
-import sys
+
 traindir = os.path.join(sys.argv[1], 'train')
 valdir = os.path.join(sys.argv[1], 'val')
 normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
