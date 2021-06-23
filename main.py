@@ -105,7 +105,7 @@ for ii, (sample, img, label) in enumerate(train_loader):
         plt.axis("off")
         plt.savefig(f"LTH/{sys.argv[2]}/{i}.png")
         plt.figure()
-        plt.imshow(f_re[i].mean(0).detach().numpy(), alpha=0.2, aspect="auto")
+        plt.imshow(f_re[i].mean(0).detach().numpy())
         plt.axis("off")
         plt.savefig(f"LTH/{sys.argv[2]}/{i}_mask.png")
         
