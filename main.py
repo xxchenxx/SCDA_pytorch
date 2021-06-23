@@ -93,7 +93,7 @@ for ii, (img, label) in enumerate(train_loader):
     
 
     for i in range(m):
-        f_re[i] = SCDA.select_aggregate(feat_re[i])
+        f_re[i] = SCDA.select_aggregate(feat_re[i])[0]
         
     import pickle
     pickle.dump(f_re, open("feature.pkl", 'wb'))
