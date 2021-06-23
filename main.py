@@ -26,7 +26,7 @@ def write_csv(results,file_name):
         writer.writerows(results)
 
 
-net1 = resnet50()
+net1 = resnet50(imagenet=True, num_classes=1000)
 print(net1)
 import torch.nn.utils.prune as prune
 import torch.nn as nn
@@ -36,6 +36,8 @@ def prune_model_custom(model, mask_dict):
     for name,m in model.named_modules():
         if isinstance(m, nn.Conv2d):
             prune.CustomFromMask.apply(m, 'weight', mask=mask_dict[name+'.weight_mask'])
+
+prune_model_custom(net1, torch.load(f"/ssd2/tlc/LT_rewind15/{sys.argv[2]}-model_best.pth.tar")['state_dict'])
 import os
 from torchvision.transforms import transforms
 from torchvision import datasets
