@@ -54,7 +54,7 @@ class ImageFolderTwoTransform(datasets.ImageFolder):
         if self.target_transform is not None:
             target = self.target_transform(target)
 
-        return sample, sample1, target
+        return np.array(sample), sample1, target
 
 traindir = os.path.join(sys.argv[1], 'train')
 valdir = os.path.join(sys.argv[1], 'val')
