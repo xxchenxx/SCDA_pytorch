@@ -1,3 +1,4 @@
+from pickle import TRUE
 from torch.utils.data import DataLoader
 from data.CUB_200 import get_dataset, input_transform, input_transform2
 import SCDA
@@ -96,7 +97,7 @@ for ii, (img, label) in enumerate(train_loader):
         f_re[i] = SCDA.select_aggregate(feat_re[i])[0]
         cc5[i] = SCDA.select_aggregate(feat_re[i])[1]
     
-    os.makedirs(f"LTH/{sys.argv[2]}")
+    os.makedirs(f"LTH/{sys.argv[2]}", exist_ok=True)
     import matplotlib.pyplot as plt
     for i in range(m):
         plt.figure()
