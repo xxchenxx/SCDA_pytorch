@@ -47,7 +47,7 @@ from torchvision import datasets
 
 class ImageFolderTwoTransform(datasets.ImageFolder):
     def __getitem__(self, index):
-        normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+        normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])
         path, target = self.samples[index]
         sample = self.loader(path)
         if self.transform is not None:
