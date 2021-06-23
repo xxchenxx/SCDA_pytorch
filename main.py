@@ -54,7 +54,7 @@ class ImageFolderTwoTransform(datasets.ImageFolder):
         if self.target_transform is not None:
             target = self.target_transform(target)
 
-        return sample1, target
+        return sample, sample1, target
 
 traindir = os.path.join(sys.argv[1], 'train')
 valdir = os.path.join(sys.argv[1], 'val')
@@ -80,7 +80,7 @@ max_ave_pool = pool_model()
 # out = open('feat.csv', 'a', newline='')
 # csv_write = csv.writer(out, dialect='excel')
 # csv_write.writerow(['features', 'label'])
-for ii, (img, label) in enumerate(train_loader):
+for ii, (sample, img, label) in enumerate(train_loader):
     # if ii == 2:
         # exit()
     feat_re = net1(img)
@@ -101,7 +101,7 @@ for ii, (img, label) in enumerate(train_loader):
     import matplotlib.pyplot as plt
     for i in range(m):
         plt.figure()
-        plt.imshow(np.transpose(img[i], (1,2,0)))
+        plt.imshow(np.transpose(sample[i], (1,2,0)))
         plt.imshow(f_re[i].mean(0).detach().numpy(), alpha=0.2, aspect="auto")
         plt.axis("off")
         plt.savefig(f"LTH/{sys.argv[2]}/{i}.png")
