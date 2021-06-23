@@ -25,9 +25,9 @@ def write_csv(results,file_name):
         writer.writerow(['id','label'])
         writer.writerows(results)
 
-torch.manual_seed(1)
-torch.cuda.manual_seed(1)
-np.random.seed(1)
+torch.manual_seed(42)
+torch.cuda.manual_seed(42)
+np.random.seed(42)
 net1 = resnet50(imagenet=True, num_classes=1000)
 print(net1)
 import torch.nn.utils.prune as prune
