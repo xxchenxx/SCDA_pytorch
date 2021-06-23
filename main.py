@@ -95,51 +95,15 @@ for ii, (img, label) in enumerate(train_loader):
     for i in range(m):
         f_re[i] = SCDA.select_aggregate(feat_re[i])[0]
         cc5[i] = SCDA.select_aggregate(feat_re[i])[1]
-    import pickle
-    pickle.dump([f_re, cc5], open(f"feature_{sys.argv[2]}.pkl", 'wb'))
-    assert False
     
-
-print("test...")
-
-feats = np.vstack(result)
-# print(feats.shape)
-label = np.vstack(label_re)
-
-x = [int(i) for i in range(feats.shape[0])]
-random.shuffle(x)
-feats = feats[x]
-labels = label[x]
-# labels = [i[0] for i in label]
-test_data = feats[:int(0.5*len(labels))]
-train_data = feats[int(0.5*len(labels)):]
-test_label = labels[:int(0.5*len(labels))]
-train_label = labels[int(0.5*len(labels)):]
-
-top1 = 0
-top5 = 0
-# ap = 0.0
-for i in range(len(test_label)):
-    # print(test_data[i].shape)
-    # exit()
-    inds = retrieve(test_data[i].reshape(1,-1), train_data, num=len(train_data))
-    # print(inds.tolist())
-    # print(inds)
-    labels = train_label[inds]
-    if labels[0] == test_label[i]:
-        top1 +=1
-    if test_label[i] in labels[:5]:
-        top5 +=1
-    # ap += compute_ap(inds.tolist(), get_gt(test_label[i], train_labels))
-    print("Query[%d / %d] complete: top1: %.4f, top5: %.4f"%(i, len(test_label), top1/(i+1), top5/(i+1)))
-
-print("top1 acc: %.4f, top5 acc %.4f"%(top1/len(test_label), top5/len(test_label)))
-
-# avg.train_data_L31a
-# maxi.train_data_L31a
-# ratio.*avg.train_data_L28a
-# ratio.*maxi.train_data_L28a 
-# avg.train_data_L31b 
-# maxi.train_data_L31b 
-# ratio.*avg.train_data_L28b 
-# ratio.*maxi.train_data_L28b
+    os.makedirs(f"LTH/{sys.argv[2]}")
+    import matplotlib.pyplot as plt
+    for i in range(m):
+        plt.figure()
+        plt.imshow(m[i])
+        plt.imshow(f_re[i].mean(0), alpha=0.2, aspect="auto")
+        plt.axis("off")
+        plt.savefig(f"LTH/{sys.argv[2]}/{i}.png")
+    
+    assert False
+        
