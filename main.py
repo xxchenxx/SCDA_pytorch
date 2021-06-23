@@ -9,7 +9,7 @@ import csv
 import numpy as np
 from util.model import pool_model
 import random
-
+from models.resnet import resnet18_5, resnet50
 
 def retrieve(q, data, num=5):
     distances = np.sum(np.square((data - q)), axis=-1)
@@ -26,90 +26,74 @@ def write_csv(results,file_name):
         writer.writerows(results)
 
 
-net1 = models.vgg16(pretrained=True).features[:-3]
-net2 = models.vgg16(pretrained=True).features
-dataset_or = get_dataset()
-# dataset_filp = get_dataset(transform=input_transform2)
-data_or = DataLoader(dataset_or, batch_size=10, shuffle=True,num_workers=0)
-# data_flip = DataLoader(dataset_filp, batch_size=20, shuffle=True,num_workers=0)
+net1 = resnet50()
+print(net1)
+import torch.nn.utils.prune as prune
+import torch.nn as nn
+def prune_model_custom(model, mask_dict):
+
+    print('start unstructured pruning with custom mask')
+    for name,m in model.named_modules():
+        if isinstance(m, nn.Conv2d):
+            prune.CustomFromMask.apply(m, 'weight', mask=mask_dict[name+'.weight_mask'])
+import os
+from torchvision.transforms import transforms, datasets
+
+class ImageFolderTwoTransform(datasets.ImageFolder):
+    def __getitem__(self, index):
+        path, target = self.samples[index]
+        sample = self.loader(path)
+        if self.transform is not None:
+            sample1 = self.transform(sample)
+        if self.target_transform is not None:
+            target = self.target_transform(target)
+
+        return sample1, target
+import sys
+traindir = os.path.join(sys.argv[1], 'train')
+valdir = os.path.join(sys.argv[1], 'val')
+normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                std=[0.229, 0.224, 0.225])
+train_dataset = ImageFolderTwoTransform(
+    traindir,
+    transforms.Compose([
+        transforms.RandomResizedCrop(224),
+        #transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        normalize,
+    ]))
+
+train_loader = torch.utils.data.DataLoader(
+    train_dataset, batch_size=10, shuffle=True,
+    num_workers=0, pin_memory=True)
+
 net1.eval()
-net2.eval()
 result = []
 label_re = []
 max_ave_pool = pool_model()
 # out = open('feat.csv', 'a', newline='')
 # csv_write = csv.writer(out, dialect='excel')
 # csv_write.writerow(['features', 'label'])
-for ii, (img1, img2, label) in enumerate(data_or):
+for ii, (img, label) in enumerate(train_loader):
     # if ii == 2:
         # exit()
-    input1 = img1
-    feat_re = net1(input1)
-    feat_po = net2(input1)
-    input2 = img2
-    feat_flip_re = net1(input2)
-    feat_flip_po = net2(input2)
-    m, _, h1, w1 = feat_po.shape
+    feat_re = net1(img)
+    
     m, _, h2, w2 = feat_re.shape
     label = label.detach().numpy()
-    f_po = torch.zeros(feat_po.shape)
     f_re = torch.zeros(feat_re.shape)
-    filp_po = torch.zeros(feat_flip_po.shape)
-    filp_re = torch.zeros(feat_flip_re.shape)
-    cc8 = np.zeros((m, h1, w1)) #31
-    cc7 = np.zeros((m, h1, w1)) # 31
+    #filp_re = torch.zeros(feat_flip_re.shape)
     cc6 = np.zeros((m, h2, w2))# 28
     cc5 = np.zeros((m, h2, w2))# 28
     
 
     for i in range(m):
-        # f_re[i] = SCDA.select_aggregate(feat_re[i].detach().numpy())
-        f_po[i] = SCDA.select_aggregate(feat_po[i])[0] # 31a
-        cc2 = SCDA.select_aggregate(feat_po[i])[1]
-        cc8[i] = cc2
-        f_re[i] = SCDA.select_aggregate_and(feat_re[i], cc2)[0] # 28a
-        cc3 = SCDA.select_aggregate_and(feat_re[i], cc2)[1]
-        cc6[i] = cc3
-
+        f_re[i] = SCDA.select_aggregate(feat_re[i].detach().numpy())
         
-        filp_po[i] = SCDA.select_aggregate(feat_flip_po[i])[0] # 31b
-        cc2_f = SCDA.select_aggregate(feat_flip_po[i])[1]
-        cc7[i] = cc2_f
-        filp_re[i] = SCDA.select_aggregate_and(feat_flip_re[i], cc2_f)[0]
-        cc3_f = SCDA.select_aggregate_and(feat_flip_re[i], cc2_f)[1] # 28b
-        cc5[i] = cc3_f
-        # print(f.shape)
-        # l = int(lable[i])
-        # csv_write.writerow([f, l])
-        # del f, l
-        # result.append((f, l))
-    # print(f_po.shape)
-    l31a = max_ave_pool(f_po, cc8)
-    # exit()
-    l28a = max_ave_pool(f_re, cc6)
-
-    l31b = max_ave_pool(filp_po, cc7)
-    l28b = max_ave_pool(filp_re, cc5)
-    # print(f_po.reshape(1, -1))
-    # print(f_re)
-    # print(filp_po)
-    # print(filp_re)
-
-    feat = torch.cat((l31a, 0.5*l28a, l31b, 0.5*l28b), dim=1).reshape(m, -1).detach().numpy()
-    # print(feat.shape)
-
-    for i in range(m):
-        # print(feat[i])
-        # print(feat[i].reshape(1,-1).shape)
-        result.append(feat[i].tolist())
-        label_re.append(int(label[i]))
-        # exit()
-        
-        # az = feat[i].tolist()
-        # print(az)
-        # csv_write.writerow([az, int(label[i])])
- 
-    print('batch {}/{} complete'.format(ii+1, len(data_or)))
+    import pickle
+    pickle.dump(f_re, open("feature.pkl", 'wb'))
+    assert False
+    
 
 print("test...")
 
