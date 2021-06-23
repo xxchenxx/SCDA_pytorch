@@ -73,22 +73,33 @@ train_loader = torch.utils.data.DataLoader(
     train_dataset, batch_size=10, shuffle=True,
     num_workers=0, pin_memory=True)
 
+def pruning_model_random(model, px):
+    parameters_to_prune =[]
+    for name,m in model.named_modules():
+        if isinstance(m, nn.Conv2d):
+            parameters_to_prune.append((m,'weight'))
+    parameters_to_prune = tuple(parameters_to_prune)
+    prune.global_unstructured(
+        parameters_to_prune,
+        pruning_method=prune.RandomUnstructured,
+        amount=px,
+    )
+
 net1.eval()
-result = []
-label_re = []
-max_ave_pool = pool_model()
-# out = open('feat.csv', 'a', newline='')
-# csv_write = csv.writer(out, dialect='excel')
-# csv_write.writerow(['features', 'label'])
+net2 = resnet50(imagenet=True, num_classes=1000)
+net2.load_state_dict(net1.state_dict())
+pruning_model_random(net2, 1 - (0.8) ** int(sys.argv[2]))
+
+
 for ii, (sample, img, label) in enumerate(train_loader):
     # if ii == 2:
         # exit()
     feat_re = net1(img)
-    
+    feat_rp = net2(img)
     m, _, h2, w2 = feat_re.shape
     label = label.detach().numpy()
     f_re = torch.zeros(feat_re.shape)
-    #filp_re = torch.zeros(feat_flip_re.shape)
+    f_rp = torch.zeros(feat_rp.shape)
     cc6 = np.zeros((m, h2, w2))# 28
     cc5 = np.zeros((m, h2, w2))# 28
     
@@ -96,8 +107,12 @@ for ii, (sample, img, label) in enumerate(train_loader):
     for i in range(m):
         f_re[i] = SCDA.select_aggregate(feat_re[i])[0]
         cc5[i] = SCDA.select_aggregate(feat_re[i])[1]
-    
+        f_rp[i] = SCDA.select_aggregate(feat_rp[i])[0]
+        cc6[i] = SCDA.select_aggregate(feat_rp[i])[1]
+
     os.makedirs(f"LTH/{sys.argv[2]}", exist_ok=True)
+    os.makedirs(f"RP/{sys.argv[2]}", exist_ok=True)
+
     import matplotlib.pyplot as plt
     for i in range(m):
         plt.figure()
@@ -107,7 +122,11 @@ for ii, (sample, img, label) in enumerate(train_loader):
         plt.figure()
         plt.imshow(f_re[i].mean(0).detach().numpy())
         plt.axis("off")
-        plt.savefig(f"LTH/{sys.argv[2]}/{i}_mask.png")
+        plt.savefig(f"LTH/{sys.argv[2]}/{i}_mask_lth.png")
+        plt.figure()
+        plt.imshow(f_rp[i].mean(0).detach().numpy())
+        plt.axis("off")
+        plt.savefig(f"LTH/{sys.argv[2]}/{i}_mask_rp.png")
         
         
     
