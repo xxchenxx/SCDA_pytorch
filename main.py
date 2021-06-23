@@ -96,7 +96,7 @@ for ii, (img, label) in enumerate(train_loader):
         f_re[i] = SCDA.select_aggregate(feat_re[i])[0]
         
     import pickle
-    pickle.dump(f_re, open("feature.pkl", 'wb'))
+    pickle.dump(f_re, open(f"feature_{sys.argv[2]}.pkl", 'wb'))
     assert False
     
 
