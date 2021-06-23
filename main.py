@@ -31,7 +31,11 @@ torch.cuda.manual_seed(42)
 np.random.seed(42)
 net1 = resnet50(imagenet=True, num_classes=1000)
 net2 = resnet50(imagenet=True, num_classes=1000)
+net3 = resnet50(imagenet=True, num_classes=1000)
+
 net2.load_state_dict(net1.state_dict())
+net3.load_state_dict(net1.state_dict())
+
 print(net1)
 import torch.nn.utils.prune as prune
 import torch.nn as nn
@@ -97,12 +101,17 @@ for ii, (sample, img, label) in enumerate(train_loader):
         # exit()
     feat_re = net1(img)
     feat_rp = net2(img)
+    feat = net3(img)
+
     m, _, h2, w2 = feat_re.shape
     label = label.detach().numpy()
     f_re = torch.zeros(feat_re.shape)
     f_rp = torch.zeros(feat_rp.shape)
+    f = torch.zeros(feat_rp.shape)
+
     cc6 = np.zeros((m, h2, w2))# 28
     cc5 = np.zeros((m, h2, w2))# 28
+    cc4 = np.zeros((m, h2, w2))# 28
     
 
     for i in range(m):
@@ -110,9 +119,12 @@ for ii, (sample, img, label) in enumerate(train_loader):
         cc5[i] = SCDA.select_aggregate(feat_re[i])[1]
         f_rp[i] = SCDA.select_aggregate(feat_rp[i])[0]
         cc6[i] = SCDA.select_aggregate(feat_rp[i])[1]
+        f[i] = SCDA.select_aggregate(feat[i])[0]
+        cc4[i] = SCDA.select_aggregate(feat[i])[1]
 
     os.makedirs(f"LTH/{sys.argv[2]}", exist_ok=True)
     os.makedirs(f"RP/{sys.argv[2]}", exist_ok=True)
+    os.makedirs(f"Dense/{sys.argv[2]}", exist_ok=True)
 
     import matplotlib.pyplot as plt
     for i in range(m):
@@ -120,14 +132,22 @@ for ii, (sample, img, label) in enumerate(train_loader):
         plt.imshow(np.transpose(sample[i], (1,2,0)))
         plt.axis("off")
         plt.savefig(f"LTH/{sys.argv[2]}/{i}.png")
+        plt.close()
         plt.figure()
         plt.imshow(f_re[i].mean(0).detach().numpy())
         plt.axis("off")
         plt.savefig(f"LTH/{sys.argv[2]}/{i}_mask_lth.png")
+        plt.close()
         plt.figure()
         plt.imshow(f_rp[i].mean(0).detach().numpy())
         plt.axis("off")
         plt.savefig(f"LTH/{sys.argv[2]}/{i}_mask_rp.png")
+        plt.close()
+        plt.figure()
+        plt.imshow(f[i].mean(0).detach().numpy())
+        plt.axis("off")
+        plt.savefig(f"LTH/{sys.argv[2]}/{i}_mask_dense.png")
+        plt.close()
         
         
     
