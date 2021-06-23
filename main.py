@@ -47,6 +47,7 @@ from torchvision import datasets
 
 class ImageFolderTwoTransform(datasets.ImageFolder):
     def __getitem__(self, index):
+        normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
         path, target = self.samples[index]
         sample = self.loader(path)
         if self.transform is not None:
@@ -54,11 +55,7 @@ class ImageFolderTwoTransform(datasets.ImageFolder):
         if self.target_transform is not None:
             target = self.target_transform(target)
 
-        return transforms.Compose([
-        transforms.RandomResizedCrop(224),
-        #transforms.RandomHorizontalFlip(),
-        transforms.ToTensor()
-    ])(sample), sample1, target
+        return sample1, normalize(sample1), target
 
 traindir = os.path.join(sys.argv[1], 'train')
 valdir = os.path.join(sys.argv[1], 'val')
@@ -68,9 +65,8 @@ train_dataset = ImageFolderTwoTransform(
     traindir,
     transforms.Compose([
         transforms.RandomResizedCrop(224),
-        #transforms.RandomHorizontalFlip(),
+        transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        normalize,
     ]))
 
 train_loader = torch.utils.data.DataLoader(
