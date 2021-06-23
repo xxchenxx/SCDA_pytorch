@@ -30,6 +30,8 @@ torch.manual_seed(42)
 torch.cuda.manual_seed(42)
 np.random.seed(42)
 net1 = resnet50(imagenet=True, num_classes=1000)
+net2 = resnet50(imagenet=True, num_classes=1000)
+net2.load_state_dict(net1.state_dict())
 print(net1)
 import torch.nn.utils.prune as prune
 import torch.nn as nn
@@ -86,8 +88,7 @@ def pruning_model_random(model, px):
     )
 
 net1.eval()
-net2 = resnet50(imagenet=True, num_classes=1000)
-net2.load_state_dict(net1.state_dict())
+
 pruning_model_random(net2, 1 - (0.8) ** int(sys.argv[2]))
 
 
