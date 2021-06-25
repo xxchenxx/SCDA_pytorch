@@ -70,8 +70,9 @@ normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
 train_dataset = ImageFolderTwoTransform(
     traindir,
     transforms.Compose([
-        transforms.RandomResizedCrop(224),
-        transforms.RandomHorizontalFlip(),
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        #transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
     ]))
 
