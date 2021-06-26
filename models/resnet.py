@@ -142,8 +142,8 @@ class ResNet(nn.Module):
 
         # cifar10
         print('normalize setting is default for CIFAR10')
-        self.normalize = NormalizeByChannelMeanStd(
-            mean=[0.4914, 0.4822, 0.4465], std=[0.2470, 0.2435, 0.2616])
+        #self.normalize = NormalizeByChannelMeanStd(
+        #    mean=[0.4914, 0.4822, 0.4465], std=[0.2470, 0.2435, 0.2616])
 
         if not imagenet:
             self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=3, stride=1, padding=1, bias=False)
@@ -216,8 +216,7 @@ class ResNet(nn.Module):
     def _forward_impl(self, x):
 
         # See note [TorchScript super()]
-        x = self.normalize(x)
-
+        
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
@@ -228,9 +227,9 @@ class ResNet(nn.Module):
         x = self.layer3(x)
         x = self.layer4(x)
 
-        #x = self.avgpool(x)
-        #x = torch.flatten(x, 1)
-        #x = self.fc(x)
+        x = self.avgpool(x)
+        x = torch.flatten(x, 1)
+        x = self.fc(x)
 
         return x
 
