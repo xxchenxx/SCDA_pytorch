@@ -94,3 +94,39 @@ from ntk import get_ntk_n
 device = torch.device("cuda:0")
 net1 = net1.to(device)
 get_ntk_n(net1, train_loader, device, 10)
+
+
+def get_curve_complexity(model, size_curve=(500,3,224,224), batch_size=128):
+
+    # init input
+    n_interp, C, H, W = size_curve
+    theta = torch.linspace(0, 2 * np.pi, n_interp)
+    theta.requires_grad_(True)
+    curve_input = torch.matmul(torch.svd(torch.randn(H*W*C, 2))[0], torch.stack([torch.cos(theta), torch.sin(theta)])).T.reshape((n_interp, C, H, W)).cuda(non_blocking=True)
+    curve_input.requires_grad_(True)
+    
+    # calculate curve complexity
+    model.train()
+    model.zero_grad()
+    _idx = 0
+    LE = 0
+    while _idx < len(curve_input):
+        output = model(curve_input[_idx:_idx+batch_size])
+        _idx += batch_size
+        output = output.reshape(output.size(0), -1)
+        n, c = output.size()
+        jacobs = []
+        for coord in range(c):
+            output[:, coord].backward(torch.ones_like(output[:, coord]), retain_graph=True)
+            jacobs.append(theta.grad.detach().clone())
+            theta.grad.zero_()
+        jacobs = torch.stack(jacobs, 0)
+        jacobs = jacobs.permute(1, 0)
+        gE = torch.einsum('nd,nd->n', jacobs, jacobs).sqrt()
+        # LE.append(gE.sum().item())
+        LE += gE.sum().item()
+        torch.cuda.empty_cache()
+    return LE 
+
+
+get_curve_complexity(net1)
