@@ -12,8 +12,7 @@ def get_ntk_n(model, data_loader, device, num_batch=-1):
         target = target.to(device, non_blocking=True)
 
         # compute output
-        with torch.cuda.amp.autocast():
-            logit = model(images)
+        logit = model(images)
 
         for _idx in range(len(images)):
             logit[_idx:_idx+1].backward(torch.ones_like(logit[_idx:_idx+1]), retain_graph=True)
