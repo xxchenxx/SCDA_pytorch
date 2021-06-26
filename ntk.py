@@ -19,7 +19,7 @@ def get_ntk_n(model, data_loader, device, num_batch=-1):
             grad = []
             for name, p in model.named_parameters():
                 if p.grad is not None:
-                    grad.append(p.grad.view(-1).detach())
+                    grad.append(p.grad.view(-1).detach().cpu())
 
             grads.append(torch.cat(grad, -1))
             model.zero_grad()
