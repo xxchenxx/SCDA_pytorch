@@ -42,8 +42,8 @@ def prune_model_custom(model, mask_dict):
         if isinstance(m, nn.Conv2d):
             prune.CustomFromMask.apply(m, 'weight', mask=mask_dict[name+'.weight_mask'])
 import sys
-prune_model_custom(net1, torch.load(f"/ssd2/tlc/LT_rewind15/{sys.argv[2]}-model_best.pth.tar", map_location='cpu')['state_dict'])
-net1.load_state_dict(torch.load(f"/ssd2/tlc/LT_rewind15/{sys.argv[2]}-model_best.pth.tar", map_location='cpu')['state_dict'])
+prune_model_custom(net1, torch.load(f"/home/tlc/LT_rewind15/{sys.argv[2]}-model_best.pth.tar", map_location='cpu')['state_dict'])
+net1.load_state_dict(torch.load(f"/home/tlc/LT_rewind15/{sys.argv[2]}-model_best.pth.tar", map_location='cpu')['state_dict'])
 import os
 from torchvision.transforms import transforms
 from torchvision import datasets
