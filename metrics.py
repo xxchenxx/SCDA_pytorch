@@ -96,7 +96,7 @@ net1 = net1.to(device)
 #get_ntk_n(net1, train_loader, device, 10)
 
 
-def get_curve_complexity(model, size_curve=(500,3,224,224), batch_size=128):
+def get_curve_complexity(model, size_curve=(500,3,224,224), batch_size=16):
 
     # init input
     n_interp, C, H, W = size_curve
