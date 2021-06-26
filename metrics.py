@@ -93,4 +93,4 @@ net1.eval()
 from ntk import get_ntk_n
 device = torch.device("cuda:0")
 net1 = net1.to(device)
-get_ntk_n(net1, train_loader, device, 10)
+get_ntk_n(net1, train_loader, device, 10000)
