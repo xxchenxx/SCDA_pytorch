@@ -74,7 +74,7 @@ train_dataset = datasets.ImageFolder(
     ]))
 
 train_loader = torch.utils.data.DataLoader(
-    train_dataset, batch_size=1, shuffle=True,
+    train_dataset, batch_size=16, shuffle=True,
     num_workers=0, pin_memory=True)
 
 def pruning_model_random(model, px):
@@ -93,4 +93,4 @@ net1.eval()
 from ntk import get_ntk_n
 device = torch.device("cuda:0")
 net1 = net1.to(device)
-get_ntk_n(net1, train_loader, device, 10000)
+get_ntk_n(net1, train_loader, device, 100)
