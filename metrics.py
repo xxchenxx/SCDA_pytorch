@@ -92,4 +92,4 @@ def pruning_model_random(model, px):
 net1.eval()
 from ntk import get_ntk_n
 
-get_ntk_n(net1, train_loader, net1.device, 10)
+get_ntk_n(net1, train_loader, torch.device("cuda"), 10)
