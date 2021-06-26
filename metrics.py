@@ -31,8 +31,6 @@ torch.cuda.manual_seed(42)
 np.random.seed(42)
 net1 = resnet50(imagenet=True, num_classes=1000)
 
-net2.load_state_dict(net1.state_dict())
-net3.load_state_dict(net1.state_dict())
 
 print(net1)
 import torch.nn.utils.prune as prune
