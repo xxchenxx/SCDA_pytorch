@@ -77,7 +77,7 @@ train_dataset = ImageFolderTwoTransform(
     ]))
 
 train_loader = torch.utils.data.DataLoader(
-    train_dataset, batch_size=10, shuffle=True,
+    train_dataset, batch_size=128, shuffle=True,
     num_workers=0, pin_memory=True)
 
 def pruning_model_random(model, px):
